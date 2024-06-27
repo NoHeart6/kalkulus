@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konversi Koordinat</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            background-color: #121212;
+            color: #ffffff;
+            position: relative;
+        }
+        h1 {
+            color: #bb86fc;
+            margin-bottom: 20px;
+            font-size: 28px;
+            animation: fadeIn 1s ease-in-out;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            text-align: left;
+            animation: fadeIn 1s ease-in-out;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 5px;
+            box-sizing: border-box;
+            border: 1px solid #bb86fc;
+            border-radius: 6px;
+            background-color: #1f1f1f;
+            color: #ffffff;
+            font-size: 16px;
+            transition: background-color 0.3s, color 0.3s;
+            animation: fadeIn 1s ease-in-out;
+        }
+        button {
+            margin-top: 20px;
+            background-color: #bb86fc;
+            color: #121212;
+            cursor: pointer;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+        button:hover {
+            background-color: #3700b3;
+            color: #ffffff;
+        }
+        #hasil_konversi {
+            margin-top: 20px;
+            text-align: left;
+            padding: 10px;
+            border: 1px solid #bb86fc;
+            background-color: #1f1f1f;
+            border-radius: 6px;
+            animation: fadeIn 1s ease-in-out;
+        }
+        #grafik {
+            margin-top: 20px;
+            display: none;
+            background-color: transparent;
+            border: none;
+            animation: fadeIn 1s ease-in-out;
+        }
+        #watermark {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            color: #888;
+            font-size: 12px;
+            animation: fadeInUp 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        @media only screen and (max-width: 600px) {
+            input, button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Konversi Koordinat</h1>
+
+    <label for="pilihan">Pilih operasi yang ingin dilakukan:</label>
+    <select id="pilihan">
+        <option value="kartesius_ke_polar">Konversi dari Kartesius ke Polar</option>
+        <option value="polar_ke_kartesius">Konversi dari Polar ke Kartesius</option>
+    </select>
+
+    <div id="input_koordinat">
+        <label for="input_x">Masukkan nilai x:</label>
+        <input type="number" id="input_x" required>
+
+        <label for="input_y">Masukkan nilai y:</label>
+        <input type="number" id="input_y" required>
+
+        <label for="input_r">Masukkan nilai r:</label>
+        <input type="number" id="input_r" required>
+
+        <label for="input_theta">Masukkan nilai theta (derajat):</label>
+        <input type="number" id="input_theta" required>
+    </div>
+
+    <button onclick="konversiKoordinat()">Konversi</button>
+
+    <div id="hasil_konversi"></div>
+    
+    <canvas id="grafik" width="300" height="300"></canvas>
+
+    <div id="watermark">Aplikasi ini dibuat oleh Wisnu Hidayat (231240001422) untuk memenuhi tugas UAS Matematika Kalkulus</div>
+
+    <script>
+        function konversiKoordinat() {
+            const pilihan = document.getElementById("pilihan").value;
+            const inputX = parseFloat(document.getElementById("input_x").value);
+            const inputY = parseFloat(document.getElementById("input_y").value);
+            const inputR = parseFloat(document.getElementById("input_r").value);
+            const inputTheta = parseFloat(document.getElementById("input_theta").value);
+
+            const canvas = document.getElementById("grafik");
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.strokeStyle = "#bb86fc";
+            ctx.lineWidth = 2;
+
+            if (pilihan === "kartesius_ke_polar") {
+                if (isNaN(inputX) || isNaN(inputY)) {
+                    alert("Masukkan nilai x dan y yang valid.");
+                    return;
+                }
+                const r = Math.sqrt(inputX ** 2 + inputY ** 2);
+                const theta = Math.atan2(inputY, inputX) * (180 / Math.PI);
+                document.getElementById("hasil_konversi").innerText = `Koordinat polar: (r = ${r.toFixed(2)}, theta = ${theta.toFixed(2)} derajat)`;
+
+                ctx.beginPath();
+                ctx.arc(canvas.width / 2, canvas.height / 2, r * 10, 0, 2 * Math.PI);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(canvas.width / 2, canvas.height / 2);
+                ctx.lineTo(canvas.width / 2 + inputX * 10, canvas.height / 2 - inputY * 10);
+                ctx.stroke();
+            } else if (pilihan === "polar_ke_kartesius") {
+                if (isNaN(inputR) || isNaN(inputTheta)) {
+                    alert("Masukkan nilai r dan theta yang valid.");
+                    return;
+                }
+                const x = inputR * Math.cos(inputTheta * (Math.PI / 180));
+                const y = inputR * Math.sin(inputTheta * (Math.PI / 180));
+                document.getElementById("hasil_konversi").innerText = `Koordinat kartesius: (x = ${x.toFixed(2)}, y = ${y.toFixed(2)})`;
+
+                ctx.beginPath();
+                ctx.arc(canvas.width / 2, canvas.height / 2, inputR * 10, 0, 2 * Math.PI);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(canvas.width / 2, canvas.height / 2);
+                ctx.lineTo(canvas.width / 2 + x * 10, canvas.height / 2 - y * 10);
+                ctx.stroke();
+            }
+
+            document.getElementById("grafik").style.display = "block";
+        }
+    </script>
+</body>
+</html>
